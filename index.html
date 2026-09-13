@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: transparent !important;
+    }
+
+    #stage {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: transparent;
+    }
+
+    .sponsor {
+      display: none;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: transparent;
+    }
+
+    #medhealth {
+      object-fit: contain;
+    }
+  </style>
+</head>
+
+<body>
+
+<div id="stage">
+
+  <video
+    id="lift"
+    class="sponsor"
+    muted
+    playsinline
+    preload="auto">
+    <source src="LIFT DRIK.webm" type="video/webm">
+  </video>
+
+  <img
+    id="medhealth"
+    class="sponsor"
+    src="MedHealth">
+
+</div>
+
+<script>
+
+const lift = document.getElementById("lift");
+const medhealth = document.getElementById("medhealth");
+
+// 3 minutos
+const WAIT_TIME = 180000;
+
+// MedHealth visible 8 segundos
+const MEDHEALTH_TIME = 8000;
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function showLift() {
+
+  lift.style.display = "block";
+  lift.currentTime = 0;
+
+  try {
+    await lift.play();
+  } catch (e) {
+    console.log("Video play error:", e);
+  }
+
+  await new Promise(resolve => {
+    lift.onended = resolve;
+  });
+
+  lift.style.display = "none";
+}
+
+async function showMedHealth() {
+
+  medhealth.style.display = "block";
+
+  await sleep(MEDHEALTH_TIME);
+
+  medhealth.style.display = "none";
+}
+
+async function sponsorLoop() {
+
+  while (true) {
+
+    // LIFT
+    await showLift();
+
+    // Nada durante 3 minutos
+    await sleep(WAIT_TIME);
+
+    // MEDHEALTH
+    await showMedHealth();
+
+    // Nada durante 3 minutos
+    await sleep(WAIT_TIME);
+  }
+}
+
+window.addEventListener("load", sponsorLoop);
+
+</script>
+
+</body>
+</html>
