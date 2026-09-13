@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,10 +18,12 @@
       position: relative;
       width: 100vw;
       height: 100vh;
-      background: transparent;
+      overflow: hidden;
+      background: transparent !important;
     }
 
-    .sponsor {
+    /* LIFT VIDEO */
+    #lift {
       display: none;
       position: absolute;
       inset: 0;
@@ -31,7 +33,19 @@
       background: transparent;
     }
 
+    /* MEDHEALTH LOWER THIRD */
     #medhealth {
+      display: none;
+      position: absolute;
+
+      width: 70%;
+      height: auto;
+
+      left: 50%;
+      bottom: 6%;
+      top: auto;
+
+      transform: translateX(-50%);
       object-fit: contain;
     }
   </style>
@@ -39,87 +53,114 @@
 
 <body>
 
-<div id="stage">
+  <div id="stage">
 
-  <video
-    id="lift"
-    class="sponsor"
-    muted
-    playsinline
-    preload="auto">
-    <source src="LIFT DRIK.webm" type="video/webm">
-  </video>
+    <video
+      id="lift"
+      muted
+      playsinline
+      preload="auto">
+      <source src="LIFT DRIK.webm" type="video/webm">
+    </video>
 
-  <img
-    id="medhealth"
-    class="sponsor"
-    src="MedHealth">
+    <img
+      id="medhealth"
+      src="MedHealth"
+      alt="MedHealth Clinical">
 
-</div>
+  </div>
 
-<script>
+  <script>
 
-const lift = document.getElementById("lift");
-const medhealth = document.getElementById("medhealth");
+    const lift = document.getElementById("lift");
+    const medhealth = document.getElementById("medhealth");
 
-// 3 minutos
-const WAIT_TIME = 10000;
+    /*
+      PRUEBA:
+      10 segundos entre sponsors.
 
-// MedHealth visible 8 segundos
-const MEDHEALTH_TIME = 8000;
+      Cuando terminemos las pruebas,
+      cambiaremos esto a 180000
+      para tener 3 minutos.
+    */
+    const WAIT_TIME = 10000;
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+    // MedHealth permanece 8 segundos
+    const MEDHEALTH_TIME = 8000;
 
-async function showLift() {
 
-  lift.style.display = "block";
-  lift.currentTime = 0;
+    function sleep(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
 
-  try {
-    await lift.play();
-  } catch (e) {
-    console.log("Video play error:", e);
-  }
 
-  await new Promise(resolve => {
-    lift.onended = resolve;
-  });
+    async function showLift() {
 
-  lift.style.display = "none";
-}
+      // Asegurarnos de que MedHealth esté oculto
+      medhealth.style.display = "none";
 
-async function showMedHealth() {
+      // Mostrar Lift
+      lift.style.display = "block";
+      lift.currentTime = 0;
 
-  medhealth.style.display = "block";
+      try {
+        await lift.play();
+      } catch (error) {
+        console.log("Lift playback error:", error);
+      }
 
-  await sleep(MEDHEALTH_TIME);
+      // Esperar hasta que termine el video
+      await new Promise(resolve => {
 
-  medhealth.style.display = "none";
-}
+        lift.onended = resolve;
 
-async function sponsorLoop() {
+      });
 
-  while (true) {
+      // Ocultar Lift
+      lift.style.display = "none";
+    }
 
-    // LIFT
-    await showLift();
 
-    // Nada durante 3 minutos
-    await sleep(WAIT_TIME);
+    async function showMedHealth() {
 
-    // MEDHEALTH
-    await showMedHealth();
+      // Asegurarnos de que Lift esté oculto
+      lift.style.display = "none";
 
-    // Nada durante 3 minutos
-    await sleep(WAIT_TIME);
-  }
-}
+      // Mostrar MedHealth
+      medhealth.style.display = "block";
 
-window.addEventListener("load", sponsorLoop);
+      // Mantenerlo 8 segundos
+      await sleep(MEDHEALTH_TIME);
 
-</script>
+      // Ocultarlo
+      medhealth.style.display = "none";
+    }
+
+
+    async function sponsorLoop() {
+
+      while (true) {
+
+        // 1. LIFT
+        await showLift();
+
+        // 2. Esperar
+        await sleep(WAIT_TIME);
+
+        // 3. MEDHEALTH
+        await showMedHealth();
+
+        // 4. Esperar
+        await sleep(WAIT_TIME);
+
+        // Repetir desde Lift
+      }
+    }
+
+
+    window.addEventListener("load", sponsorLoop);
+
+  </script>
 
 </body>
 </html>
